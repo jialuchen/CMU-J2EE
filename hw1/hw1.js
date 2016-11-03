@@ -1,5 +1,5 @@
 var optBtn = document.querySelectorAll('.operator input');
-var operators = ['+', '-', 'x', '÷'];
+var operators = ['+', '-', '*', '/'];
 for (var i = 0; i < optBtn.length; i++) {
     optBtn[i].onclick = function (e) {
         var inputX = parseInt(document.getElementById("x").value);
