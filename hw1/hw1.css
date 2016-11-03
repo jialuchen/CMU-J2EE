@@ -1,0 +1,26 @@
+#calculator {
+    width: 225px;
+    height: auto;
+    text-align: center;
+    margin: 100px auto;
+    padding: 20px;
+
+    background: #ADFF2F;
+    background: linear-gradient(#ADFF2F, #90EE90);
+    border-style: solid;
+    border-color: #3CB371;
+    border-radius: 10px;
+}
+
+.operator {
+    padding:0px 50px 0px 50px;
+}
+
+.operator :hover {
+    background: #3CB371;
+    color: white;
+}
+input {
+    height:20px;
+    margin:5px;
+}
