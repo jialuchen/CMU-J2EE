@@ -5,8 +5,10 @@
     <title>hw1 calculator</title>
     <link rel="stylesheet" type="text/css" href="hw1.css">
 </head>
+<!-- when opening the window, set focus in x textbox-->
 <body onLoad="document.getElementById('x').focus()">
 <div id="calculator">
+    <!-- input textbox-->
     <span>
     <label for="x">X:</label>
     <input type="text" id="x"/>
@@ -15,12 +17,14 @@
         <label for="y">Y:</label>
     <input type="text" id="y"/>
     </span><br>
+    <!--operator buttons-->
     <span class="operator">
         <input type="button" value="+" id="+" />
         <input type="button" value="-" id="-" />
         <input type="button" value="*" id="*" />
         <input type="button" value="/" id="/" />
     </span><br>
+    <!--answer display textbox-->
     <span>
         <label for="Answer">A:</label>
         <input type="text" id="Answer" disabled/>
