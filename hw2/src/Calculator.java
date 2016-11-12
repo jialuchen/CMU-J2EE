@@ -32,6 +32,7 @@ public class Calculator extends HttpServlet {
 		System.out.println("CalculatorServlet has been initialized and it's only initialized once.");
 	}
 
+	//override doGet()
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		parameterX = request.getParameter("parameterX");
 		parameterY = request.getParameter("parameterY");
