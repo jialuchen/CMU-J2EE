@@ -52,20 +52,24 @@ public class FavoriteList extends HttpServlet {
 		HttpSession session = request.getSession();
 		User user = (User) session.getAttribute("user");
 		Favorite item = (Favorite) session.getAttribute("favorite");
+		String clicked = (String) session.getAttribute("click");
 		session.setAttribute("user", user);
 		System.out.println("I am in get");
-		//System.out.println(user.getEmailAddress());
 		if ( user == null) {
 			outputLoginPage(response, null, null);
 		} else {
+			if (clicked.equals("true")){
 			try {
 				favoriteDAO.increment(item);
 			} catch (RollbackException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+			request.setAttribute("click", "false");
 			outputFavoriteList(response, request);
 		}
+		
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -80,6 +84,7 @@ public class FavoriteList extends HttpServlet {
 				System.out.println("I am in 9");
 			}
 			else{
+				System.out.println("I am in managelist");
 				manageList(request, response);
 			}
 		}
@@ -137,7 +142,6 @@ public class FavoriteList extends HttpServlet {
 			throws ServletException, IOException {
 		RegisterForm rstForm = new RegisterForm(request);
 		List<String> rstErrors = new ArrayList<String>();
-		//System.out.println(rstForm.getEmailAddress() + rstForm.getFirstName() + rstForm.getLastName());
 		
 		if (rstForm.getButton().equals("Register now")) {
 			rstErrors.addAll(rstForm.getValidationErrors());
@@ -180,6 +184,7 @@ public class FavoriteList extends HttpServlet {
 			throws ServletException, IOException {
 		// Look at the action parameter to see what we're doing to the list
 		String action = request.getParameter("action");
+		System.out.println(action);
 		HttpSession session = request.getSession();
 		User user = (User) session.getAttribute("user");
 		session.setAttribute("user", user);
@@ -190,16 +195,16 @@ public class FavoriteList extends HttpServlet {
 		}
 
 		if (action.equals("Add Favorite")) {
+			System.out.println("add executed");
 			processAdd(request, response);
 			return;
 		}
 
-		if (action.equals("Log Out")) {
+		if (action.equals("Log out")) {
+			System.out.println("log out executed");
 			processLogOut(request, response);
-			return;
 		}
 
-		//outputFavoriteList(response, "Invalid action: " + action);
 	}
 
 	private void processAdd(HttpServletRequest request, HttpServletResponse response)
@@ -234,13 +239,11 @@ public class FavoriteList extends HttpServlet {
 	
 	private void processLogOut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		User user = new User();
 		HttpSession session = request.getSession();
         session.setAttribute("user", null);
         System.out.println("You have signed out!");
         //login(request, response);
-        outputLoginPage(response, null, null);
-		
+        outputLoginPage(response, null, null);	
 	}
 	
 
@@ -478,6 +481,7 @@ public class FavoriteList extends HttpServlet {
 					+ beans[i].getUrl() + "</td>");
 			HttpSession sen = request.getSession();
 			sen.setAttribute("favorite", beans[i]);
+			sen.setAttribute("click", "true");
 			out.println("</form>");
 			out.println("    </tr>");
 			out.println("    <tr>");
