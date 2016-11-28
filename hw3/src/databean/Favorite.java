@@ -1,14 +1,12 @@
 /**
  * Author : Jialu Chen
+ * date: 11/27/2016
+ * course: 08672
  */
 package databean;
 
 import org.genericdao.PrimaryKey;
 
-/**
- * Author :  Jialu Chen
- * Andrew ID: jialuc
- */
 @PrimaryKey("id")
 public class Favorite {
 

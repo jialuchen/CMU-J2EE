@@ -1,5 +1,8 @@
-package dao; /**
+package dao; 
+/**
  * Author : Jialu Chen
+ * date: 11/27/2016
+ * course: 08672
  */
 
 import databean.Favorite;

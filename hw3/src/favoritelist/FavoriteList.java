@@ -1,3 +1,8 @@
+/**
+ * Author : Jialu Chen
+ * date: 11/27/2016
+ * course: 08672
+ */
 package favoritelist;
 
 import java.io.IOException;
@@ -51,22 +56,34 @@ public class FavoriteList extends HttpServlet {
 			throws ServletException, IOException {
 		HttpSession session = request.getSession();
 		User user = (User) session.getAttribute("user");
-		Favorite item = (Favorite) session.getAttribute("favorite");
-		String clicked = (String) session.getAttribute("click");
+		//Favorite item = (Favorite) session.getAttribute("favorite");
+		//String clicked = (String) session.getAttribute("click");
+		String favoriteItemID = request.getParameter("favoriteItem");
+		System.out.println(favoriteItemID);
+		
+		int id = -1;
+		if (favoriteItemID != null) {
+			String[] arr = favoriteItemID.split(" ");
+			id = Integer.parseInt(arr[0]);
+			System.out.println(id);
+		}	
+		Favorite item;
+		
 		session.setAttribute("user", user);
 		System.out.println("I am in get");
 		if ( user == null) {
 			outputLoginPage(response, null, null);
-		} else {
-			if (clicked.equals("true")){
+		} else if (id != -1){
+			//if (clicked.equals("true")){
 			try {
+				item = favoriteDAO.read(id);
 				favoriteDAO.increment(item);
 			} catch (RollbackException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-			request.setAttribute("click", "false");
+		//}
+			//request.setAttribute("click", "false");
 			outputFavoriteList(response, request);
 		}
 		
@@ -466,6 +483,7 @@ public class FavoriteList extends HttpServlet {
 			out.println("</p>");
 		}
 
+		out.println("<form method=\"GET\">");
 		out.println("<table>");
 		for (int i = 0; i < beans.length; i++) {
 			out.println("    <tr>");
@@ -476,13 +494,12 @@ public class FavoriteList extends HttpServlet {
 			out.println("        </td>");
 			out.println("    </tr>");
 			out.println("    <tr>");
-			out.println("<form method=\"GET\">");
-			out.println("        <td><a href= FavoriteList>"
-					+ beans[i].getUrl() + "</td>");
-			HttpSession sen = request.getSession();
-			sen.setAttribute("favorite", beans[i]);
-			sen.setAttribute("click", "true");
-			out.println("</form>");
+			
+			//out.println("        <td><a href= FavoriteList>"
+			//		+ beans[i].getUrl() + "</td>");
+			out.println(
+					"            <td><input type=\"submit\" name=\"favoriteItem\" value=\""+ beans[i].getId() + " " + beans[i].getUrl() +"\"/></td>");
+			
 			out.println("    </tr>");
 			out.println("    <tr>");
 			out.println("        <td><span style=\"font-size: x-large\">"
@@ -494,6 +511,10 @@ public class FavoriteList extends HttpServlet {
 			out.println("    </tr>");
 		}
 		out.println("</table>");
+		//HttpSession sen = request.getSession();
+		//sen.setAttribute("favorite", beans[i]);
+		//sen.setAttribute("click", "true");
+		out.println("</form>");
 
 		out.println("</body>");
 		out.println("</html>");

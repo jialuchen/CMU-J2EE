@@ -1,14 +1,14 @@
-package formbean; /**
+package formbean; 
+/**
  * Author : Jialu Chen
+ * date: 11/27/2016
+ * course: 08672
  */
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-/**
- * Author :  Jialu Chen
- * Andrew ID: jialuc
- */
+
 public class FavoriteForm{
     private String url;
     private String comment;

@@ -1,5 +1,7 @@
 /**
  * Author : Jialu Chen
+ * date: 11/27/2016
+ * course: 08672
  */
 package databean;
 
@@ -9,10 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
-/**
- * Author :  Jialu Chen
- * Andrew ID: jialuc
- */
+
 @PrimaryKey("userId")
 public class User {
 

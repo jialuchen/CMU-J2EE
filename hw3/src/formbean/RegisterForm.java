@@ -5,8 +5,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 /**
- * Author :  Jialu Chen
- * Andrew ID: jialuc
+ * Author : Jialu Chen
+ * date: 11/27/2016
+ * course: 08672
  */
 public class RegisterForm{
 

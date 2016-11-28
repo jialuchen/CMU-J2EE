@@ -5,8 +5,9 @@ import org.genericdao.impl.matcharg.BinaryMatchArg;
 import org.genericdao.impl.matcharg.MatchOp;
 
 /**
- * Author :  Jialu Chen
- * Andrew ID: jiauc
+ * Author : Jialu Chen
+ * date: 11/27/2016
+ * course: 08672
  */
 public class UserDAO extends GenericDAO<User> {
 
