@@ -50,21 +50,42 @@ public class FavoriteList extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		HttpSession session = request.getSession();
-		if (session.getAttribute("user") == null) {
+		User user = (User) session.getAttribute("user");
+		Favorite item = (Favorite) session.getAttribute("favorite");
+		session.setAttribute("user", user);
+		System.out.println("I am in get");
+		//System.out.println(user.getEmailAddress());
+		if ( user == null) {
 			outputLoginPage(response, null, null);
 		} else {
-			outputFavoriteList(response);
+			try {
+				favoriteDAO.increment(item);
+			} catch (RollbackException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			outputFavoriteList(response, request);
 		}
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		HttpSession session = request.getSession();
-		if (session.getAttribute("user") == null) {
-			login(request, response);
-		} else {
-			manageList(request, response);
+		User user = (User) session.getAttribute("user");
+		String regstr = (String) session.getAttribute("register");
+		session.setAttribute("user", user);
+		if (regstr == null || !regstr.equals("true")) {
+			if (user == null) {
+				login(request, response);
+				System.out.println("I am in 9");
+			}
+			else{
+				manageList(request, response);
+			}
 		}
+		else if(regstr.equals("true")) {
+				register(request, response);
+			} 
 	}
 
 	private void login(HttpServletRequest request, HttpServletResponse response)
@@ -85,23 +106,27 @@ public class FavoriteList extends HttpServlet {
 			if (form.getButton().equals("Register")) {
 				register(request, response);
 			} else {
+				System.out.println("I am in 8");
 				user = userDAO.read(form.getEmailAddress());
 				if (user == null) {
 					errors.add("No such user");
 					outputLoginPage(response, form, errors);
 					return;
 				}
+				//System.out.println(form.getPassword());
+				//System.out.println(user.getPassword());
 
-				if (!user.checkPassword(form.getPassword())) {
+				if (!user.getPassword().equals(form.getPassword())) {
 					errors.add("Incorrect password");
 					outputLoginPage(response, form, errors);
 					return;
 				}
+				HttpSession session = request.getSession();
+				session.setAttribute("user", user);
+				outputFavoriteList(response, request);
 			}
 
-			HttpSession session = request.getSession();
-			session.setAttribute("user", user);
-			outputFavoriteList(response);
+			
 		} catch (RollbackException e) {
 			errors.add(e.getMessage());
 			outputLoginPage(response, form, errors);
@@ -110,42 +135,57 @@ public class FavoriteList extends HttpServlet {
 	
 	private void register(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		List<String> rstErrors = new ArrayList<String>();
 		RegisterForm rstForm = new RegisterForm(request);
+		List<String> rstErrors = new ArrayList<String>();
+		//System.out.println(rstForm.getEmailAddress() + rstForm.getFirstName() + rstForm.getLastName());
 		
-		rstErrors.addAll(rstForm.getValidationErrors());
-		if (rstErrors.size() != 0) {
-			outputRegisterPage(response, rstForm, rstErrors);
-			return;
-		}
-		
-		try {
-			User user;
+		if (rstForm.getButton().equals("Register now")) {
+			rstErrors.addAll(rstForm.getValidationErrors());
+			if (rstErrors.size() != 0) {
+				outputRegisterPage(response, rstForm, rstErrors);
+				System.out.println("I am in 1");
+				return;
+			}
+			
+			try {
+				System.out.println("I am in 2");
+				User user;
+					user = userDAO.read(rstForm.getEmailAddress());
+					if (user != null) {
+						rstErrors.add("This email address has already been registered!");
+						outputRegisterPage(response, rstForm, rstErrors);
+						return;
+					}
+						user = new User(rstForm.getEmailAddress(), rstForm.getFirstName(), rstForm.getLastName(), rstForm.getPassword());					
 
-				user = userDAO.read(rstForm.getEmailAddress());
-				if (user != null) {
-					rstErrors.add("This email address has already been registered!");
-					outputRegisterPage(response, rstForm, rstErrors);
-					return;
-				}
-
+				HttpSession session = request.getSession();
+				session.setAttribute("user", user);
+				userDAO.create(user);
+				session.setAttribute("register", "false");
+				outputFavoriteList(response, request);
+			} catch (RollbackException e) {
+				rstErrors.add(e.getMessage());
+				outputRegisterPage(response, rstForm, rstErrors);
+			}
+		} else {
 			HttpSession session = request.getSession();
-			session.setAttribute("user", user);
-			outputFavoriteList(response);
-			userDAO.create(user);
-		} catch (RollbackException e) {
-			rstErrors.add(e.getMessage());
+			session.setAttribute("register", "true");
 			outputRegisterPage(response, rstForm, rstErrors);
+			System.out.println("I am in 3");
 		}
+		
 	}
 
 	private void manageList(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// Look at the action parameter to see what we're doing to the list
 		String action = request.getParameter("action");
+		HttpSession session = request.getSession();
+		User user = (User) session.getAttribute("user");
+		session.setAttribute("user", user);
 
 		if (action == null) {
-			outputFavoriteList(response, "No action specified.");
+			outputFavoriteList(response, request);
 			return;
 		}
 
@@ -167,10 +207,13 @@ public class FavoriteList extends HttpServlet {
 		List<String> errors = new ArrayList<String>();
 
 		FavoriteForm form = new FavoriteForm(request);
+		HttpSession session = request.getSession();
+		User u = (User) session.getAttribute("user");
+		session.setAttribute("user", u);
 
 		errors.addAll(form.getValidationErrors());
 		if (errors.size() > 0) {
-			outputFavoriteList(response, errors);
+			outputFavoriteList(response, request, errors);
 			return;
 		}
 
@@ -179,22 +222,27 @@ public class FavoriteList extends HttpServlet {
 			bean.setUrl(form.getUrl());
 			bean.setComment(form.getUrl());
 			bean.setClickCount(0);
-			User u = (User) request.getSession().getAttribute("user");
 			bean.setUserId(u.getUserId());
 			favoriteDAO.create(bean);
 			
-			outputFavoriteList(response, "Item Added");
+			outputFavoriteList(response, request, "Item Added");
 		} catch (RollbackException e) {
 			errors.add(e.getMessage());
-			outputFavoriteList(response, errors);
+			outputFavoriteList(response, request, errors);
 		}
 	}
 	
-	private void processClick(HttpServletRequest request, HttpServletResponse response)
+	private void processLogOut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		To do;
+		User user = new User();
+		HttpSession session = request.getSession();
+        session.setAttribute("user", null);
+        System.out.println("You have signed out!");
+        //login(request, response);
+        outputLoginPage(response, null, null);
 		
 	}
+	
 
 	// Methods that generate & output HTML
 	
@@ -233,7 +281,7 @@ public class FavoriteList extends HttpServlet {
 		out.println("    <table>");
 		out.println("        <tr>");
 		out.println(
-				"            <td style=\"font-size: x-large\">User Name:</td>");
+				"            <td style=\"font-size: x-large\">User Email:</td>");
 		out.println("            <td>");
 		out.println("                <input type=\"text\" name=\"emailAddress\"");
 		if (form != null && form.getEmailAddress() != null) {
@@ -291,7 +339,7 @@ public class FavoriteList extends HttpServlet {
 		out.println("    <table>");
 		out.println("        <tr>");
 		out.println(
-				"            <td style=\"font-size: x-large\">User Name:</td>");
+				"            <td style=\"font-size: x-large\">User Email:</td>");
 		out.println("            <td>");
 		out.println("                <input type=\"text\" name=\"emailAddress\"");
 		if (form != null && form.getEmailAddress() != null) {
@@ -323,7 +371,7 @@ public class FavoriteList extends HttpServlet {
 		out.println(
 				"            <td colspan=\"2\" style=\"text-align: center;\">");
 		out.println(
-				"                <input type=\"submit\" name=\"button\" value=\"Register\" />");
+				"                <input type=\"submit\" name=\"button\" value=\"Register now\" />");
 		out.println("            </td>");
 		out.println("        </tr>");
 		out.println("    </table>");
@@ -332,27 +380,30 @@ public class FavoriteList extends HttpServlet {
 		out.println("</html>");
 	}
 
-	private void outputFavoriteList(HttpServletResponse response)
+	private void outputFavoriteList(HttpServletResponse response, HttpServletRequest request)
 			throws IOException {
 		// Just call the version that takes a List passing an empty List
 		List<String> list = new ArrayList<String>();
-		outputFavoriteList(response, list);
+		outputFavoriteList(response, request, list);
 	}
 
-	private void outputFavoriteList(HttpServletResponse response, String message)
+	private void outputFavoriteList(HttpServletResponse response, HttpServletRequest request, String message)
 			throws IOException {
 		// Put the message into a List and call the version that takes a List
 		List<String> list = new ArrayList<String>();
 		list.add(message);
-		outputFavoriteList(response, list);
+		outputFavoriteList(response, request, list);
 	}
 
-	private void outputFavoriteList(HttpServletResponse response,
+	private void outputFavoriteList(HttpServletResponse response, HttpServletRequest request, 
 			List<String> messages) throws IOException {
 		// Get the list of items to display at the end
 		Favorite[] beans;
+		HttpSession session = request.getSession();
+		User user = (User) session.getAttribute("user");
+		//System.out.println(user.getFirstName());
 		try {
-			beans = favoriteDAO.getFavoritesList();
+			beans = favoriteDAO.getFavoritesList(user.getUserId());
 		} catch (RollbackException e) {
 			// If there's an access error, add the message to our list of
 			// messages
@@ -371,11 +422,9 @@ public class FavoriteList extends HttpServlet {
 
 		out.println("<body>");
 		out.println("<h2>Favorites for ");
-		if (beans.length > 0) {
-			int usrID = beans[0].getUserId();
-			User usr = userDAO.read(usrID);
-			out.println(usr.getFirstName() + " ");
-			out.println(usr.getLastName());
+		if (user != null) {
+			out.println(user.getFirstName() + " ");
+			out.println(user.getLastName());
 		}
 				
 		out.println("</h2>");
@@ -422,12 +471,22 @@ public class FavoriteList extends HttpServlet {
 					"                <input type=\"hidden\" name=\"id\" value=\""
 							+ beans[i].getId() + "\" />");
 			out.println("        </td>");
+			out.println("    </tr>");
+			out.println("    <tr>");
+			out.println("<form method=\"GET\">");
+			out.println("        <td><a href= FavoriteList>"
+					+ beans[i].getUrl() + "</td>");
+			HttpSession sen = request.getSession();
+			sen.setAttribute("favorite", beans[i]);
+			out.println("</form>");
+			out.println("    </tr>");
+			out.println("    <tr>");
 			out.println("        <td><span style=\"font-size: x-large\">"
-					+ beans[i].getUrl() + "</td><br>");
+					+ beans[i].getComment() + "</td>");
 			out.println("        <td><span style=\"font-size: x-large\">"
-					+ beans[i].getComment() + "</td><br>");
-			out.println("        <td><span style=\"font-size: x-large\">"
-					+ beans[i].getClickCount() + "</td><br>");
+					+ beans[i].getClickCount() + "</td>");
+			out.println("    </tr>");
+			out.println("    <tr>");
 			out.println("    </tr>");
 		}
 		out.println("</table>");

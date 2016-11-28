@@ -20,8 +20,7 @@ public class User {
     private String emailAddress;
     private String firstName;
     private String lastName;
-    private String hashedPassword;
-    private int salt;
+    private String password;
     
     public User() {
     }
@@ -30,52 +29,8 @@ public class User {
         this.emailAddress = emailAddress;
         this.firstName = firstName;
         this.lastName = lastName;
-        salt = newSalt();
-        this.hashedPassword = hash(password);
+        this.password = password;
     }
-
-    public int getSalt() {
-        return salt;
-    }
-
-    public void setSalt(int salt) {
-        this.salt = salt;
-    }
-
-    private String hash(String clearPassword) {
-        if (salt == 0) return null;
-
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError("Can't find the SHA1 algorithm in the java.security package");
-        }
-
-        String saltString = String.valueOf(salt);
-
-        md.update(saltString.getBytes());
-        md.update(clearPassword.getBytes());
-        byte[] digestBytes = md.digest();
-
-        // Format the digest as a String
-        StringBuffer digestSB = new StringBuffer();
-        for (int i = 0; i < digestBytes.length; i++) {
-            int lowNibble = digestBytes[i] & 0x0f;
-            int highNibble = (digestBytes[i] >> 4) & 0x0f;
-            digestSB.append(Integer.toHexString(highNibble));
-            digestSB.append(Integer.toHexString(lowNibble));
-        }
-        String digestStr = digestSB.toString();
-
-        return digestStr;
-    }
-
-    private int newSalt() {
-        Random random = new Random();
-        return random.nextInt(8192) + 1;  // salt cannot be zero
-    }
-
 
     public int getUserId() {
         return userId;
@@ -111,22 +66,11 @@ public class User {
 
 
     public void setPassword(String password) {
-        salt = newSalt();
-        hashedPassword = hash(password);
-        System.out.println("salt:" + salt + ", password:" + password);
+        this.password = password;
     }
 
-    public String getHashedPassword() {
-        return hashedPassword;
-    }
-
-    public void setHashedPassword(String hashedPassword) {
-        this.hashedPassword = hashedPassword;
-    }
-
-    public boolean checkPassword(String password) {
-        return password != null && !password.replaceAll(" ", "").equals("")
-                && this.hashedPassword != null && this.hashedPassword.equals(hash(password));
+    public String getPassword() {
+        return password;
     }
 
 }
