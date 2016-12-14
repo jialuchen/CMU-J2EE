@@ -58,7 +58,6 @@ public class User {
         md.update(clearPassword.getBytes());
         byte[] digestBytes = md.digest();
 
-        // Format the digest as a String
         StringBuffer digestSB = new StringBuffer();
         for (int i = 0; i < digestBytes.length; i++) {
             int lowNibble = digestBytes[i] & 0x0f;
@@ -110,7 +109,7 @@ public class User {
     }
 
 
-    public void setPassword(String password) {
+    public void recordPassword(String password) {
         salt = newSalt();
         hashedPassword = hash(password);
         System.out.println("salt:" + salt + ", password:" + password);
