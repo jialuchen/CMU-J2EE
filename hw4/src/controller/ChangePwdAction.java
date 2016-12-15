@@ -1,6 +1,5 @@
 package controller;
 
-
 import databeans.User;
 import formbeans.ChangePwdForm;
 import model.Model;
@@ -36,7 +35,7 @@ public class ChangePwdAction extends Action {
         request.setAttribute("errors", errors);
 
         try {
-            // Set up user list for nav bar
+            // Set up user list for nav 
             request.setAttribute("userList", userDAO.getUsers());
 
             // Load the form parameters into a form bean
