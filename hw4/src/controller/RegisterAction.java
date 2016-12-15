@@ -44,8 +44,13 @@ public class RegisterAction extends Action {
             if (!form.isPresent()) {
                 return "register.jsp";
             }
+            
+            if (userDAO.read(form.getEmailAddress()) != null) {
+            	errors.add("The email has already existed!");
+            }
 
             errors.addAll(form.getValidationErrors());
+            
             if (errors.size() != 0) {
                 return "register.jsp";
             }

@@ -7,6 +7,8 @@ package formbeans;
 
 import org.mybeans.form.FormBean;
 
+import model.UserDAO;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ public class RegisterForm extends FormBean {
     private String confirmPassword;
     private String firstName;
     private String lastName;
+    
 
     public String getEmailAddress() {
         return emailAddress;
@@ -38,7 +41,6 @@ public class RegisterForm extends FormBean {
 
     public List<String> getValidationErrors() {
         List<String> errors = new ArrayList<String>();
-
 
         if (emailAddress == null || emailAddress.length() == 0) {
             errors.add("Email address is required");

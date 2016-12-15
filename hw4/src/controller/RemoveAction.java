@@ -47,7 +47,7 @@ public class RemoveAction extends Action {
             User user = (User) request.getSession().getAttribute("user");
 
             int id = form.getIdAsInt();
-            favoriteDAO.delete(id);//TODO should we check the id
+            favoriteDAO.delete(id, user.getUserId());
 
             // Be sure to get the favoriteList after the delete
             Favorite[] favoriteList = favoriteDAO.getFavoritesList(user.getUserId());

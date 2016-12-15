@@ -38,6 +38,6 @@ public class LogoutAction extends Action {
         session.setAttribute("user", null);
 
         request.setAttribute("message", "You are now logged out");
-        return "success.jsp";
+        return "logout.jsp";
     }
 }
