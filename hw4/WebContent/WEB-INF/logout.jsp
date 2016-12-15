@@ -4,7 +4,7 @@
     ${message}
 </p>
 
-<p> Click <a href="manage.do">here</a> to go back to main page.
+<p> Click <a href="manage.do">here</a> to go back to the main page.
 
 </p>
 
